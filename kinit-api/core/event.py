@@ -80,7 +80,11 @@ async def connect_redis(app: FastAPI, status: bool):
         except RedisError as e:
             raise RedisError(f"Redis 连接失败: {e}")
         try:
-            await Cache(app.state.redis).cache_tab_names()
+            cache = Cache(app.state.redis)
+            await cache.cache_tab_names()
+            # await cache.cache_cookie_info()
+
+
         except ProgrammingError as e:
             logger.error(f"sqlalchemy.exc.ProgrammingError: {e}")
             print(f"sqlalchemy.exc.ProgrammingError: {e}")

@@ -8,9 +8,11 @@
 
 from typing import List
 
-from sqlalchemy import false
+from sqlalchemy import false, inspect
 from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
+
+from apps.platform.baseinfo.models import PlatformCookie
 from core.logger import logger  # 注意：报错就在这里，如果只写 core.logger 会写入日志报错，很难排查
 from core.database import db_getter
 from apps.vadmin.system.models import VadminSystemSettingsTab
@@ -18,10 +20,10 @@ import json
 from redis.asyncio.client import Redis
 from core.exception import CustomException
 from utils import status
+from utils.request_util import obj_to_dict
 
 
 class Cache:
-
     DEFAULT_TAB_NAMES = ["wx_server", "aliyun_sms", "aliyun_oss", "web_email"]
 
     def __init__(self, rd: Redis):
@@ -39,7 +41,7 @@ class Cache:
             model.is_delete == false(),
             model.tab_name.in_(tab_names),
             model.disabled == false()
-            ).options(*[load for load in v_options])
+        ).options(*[load for load in v_options])
         queryset = await session.execute(sql)
         datas = queryset.scalars().unique().all()
         return self.__generate_values(datas)
@@ -87,3 +89,16 @@ class Cache:
             raise CustomException(f"获取{tab_name}配置信息失败，请联系管理员！", code=status.HTTP_ERROR)
         else:
             return json.loads(result)
+
+    # async def cache_cookie_info(self) -> List[any]:
+    #     """
+    #     获取系统配置标签下的标签信息
+    #     """
+    #     async_session = db_getter()
+    #     session = await async_session.__anext__()
+    #     model = PlatformCookie
+    #     sql = select(model)
+    #     queryset = await session.execute(sql)
+    #     datas = queryset.scalars().unique().all()
+    #     for data in datas:
+    #         await self.rd.client().set(data.uniq_id, json.dumps(obj_to_dict(data)))

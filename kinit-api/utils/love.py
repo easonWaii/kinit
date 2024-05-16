@@ -1,4 +1,3 @@
-# 晚上星月争辉，美梦陪你入睡
 import random
 from math import sin, cos, pi, log
 from tkinter import *

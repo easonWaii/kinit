@@ -50,4 +50,3 @@ class DictDetailsSimpleOut(DictDetails):
     id: int
     create_datetime: DatetimeStr
     update_datetime: DatetimeStr
-
